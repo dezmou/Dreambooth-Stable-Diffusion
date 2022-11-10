@@ -72,6 +72,15 @@ def get_parser(**parser_kwargs):
         nargs="?",
         help="resume from logdir or checkpoint in logdir",
     )
+
+    parser.add_argument(
+        "--gpu",
+        type=int,
+        nargs="?",
+        default=0,
+        help="which gpu use"
+    )
+
     parser.add_argument(
         "-b",
         "--base",
@@ -581,6 +590,9 @@ if __name__ == "__main__":
     parser = Trainer.add_argparse_args(parser)
 
     opt, unknown = parser.parse_known_args()
+
+    torch.cuda.set_device(opt.gpu)
+
     if opt.name and opt.resume:
         raise ValueError(
             "-n/--name and -r/--resume cannot be specified both."

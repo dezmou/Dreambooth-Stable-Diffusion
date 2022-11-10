@@ -16,7 +16,6 @@ from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.models.diffusion.plms import PLMSSampler
 
-
 def chunk(it, size):
     it = iter(it)
     return iter(lambda: tuple(islice(it, size)), ())
@@ -44,6 +43,14 @@ def load_model_from_config(config, ckpt, verbose=False):
 
 def main():
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--gpu",
+        type=int,
+        nargs="?",
+        default=0,
+        help="which gpu use"
+    )
 
     parser.add_argument(
         "--prompt",
@@ -182,6 +189,8 @@ def main():
         help="Path to a pre-trained embedding manager checkpoint")
 
     opt = parser.parse_args()
+
+    torch.cuda.set_device(opt.gpu)
 
     if opt.laion400m:
         print("Falling back to LAION 400M model...")
