@@ -74,6 +74,14 @@ def get_parser(**parser_kwargs):
     )
 
     parser.add_argument(
+        "--profil",
+        type=str,
+        nargs="?",
+        default="_test",
+        help="profil"
+    )
+
+    parser.add_argument(
         "--gpu",
         type=int,
         nargs="?",
@@ -907,4 +915,6 @@ if __name__ == "__main__":
             os.rename(logdir, dst)
         if trainer.global_rank == 0:
             print("Training complete. max_training_steps reached or we blew up.")
+            os.makedirs("/home/profils/" + opt.profil, exist_ok=True)
+            os.replace(logdir + "/checkpoints/last.ckpt", "/home/profils/" + opt.profil + "/last.ckpt")
             # print(trainer.profiler.summary())
