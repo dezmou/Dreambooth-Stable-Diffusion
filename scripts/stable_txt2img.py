@@ -67,6 +67,13 @@ def main():
         default="outputs/txt2img-samples"
     )
     parser.add_argument(
+        "--profil",
+        type=str,
+        nargs="?",
+        help="profil ckpt id",
+        default="_test"
+    )
+    parser.add_argument(
         "--skip_grid",
         action='store_true',
         help="do not save a grid, only individual samples. Helpful when evaluating lots of samples",
@@ -181,8 +188,6 @@ def main():
         choices=["full", "autocast"],
         default="autocast"
     )
-
-
     parser.add_argument(
         "--embedding_path", 
         type=str, 
@@ -201,7 +206,7 @@ def main():
     seed_everything(opt.seed)
 
     config = OmegaConf.load(f"{opt.config}")
-    model = load_model_from_config(config, f"{opt.ckpt}")
+    model = load_model_from_config(config, "/home/profils/" + opt.profil + "/last.ckpt")
     #model.embedding_manager.load(opt.embedding_path)
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -230,7 +235,7 @@ def main():
 
     sample_path = os.path.join(outpath, "samples")
     os.makedirs(sample_path, exist_ok=True)
-    base_count = len(os.listdir(sample_path))
+    base_count = 0
     grid_count = len(os.listdir(outpath)) - 1
 
     start_code = None
@@ -268,26 +273,25 @@ def main():
                         if not opt.skip_save:
                             for x_sample in x_samples_ddim:
                                 x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-                                Image.fromarray(x_sample.astype(np.uint8)).save(
-                                    os.path.join(sample_path, f"{base_count:05}.jpg"))
+                                Image.fromarray(x_sample.astype(np.uint8)).save("/home/profils/" + opt.profil + "/res/" + f"{base_count}.jpg")
                                 base_count += 1
 
-                        if not opt.skip_grid:
-                            all_samples.append(x_samples_ddim)
+                        # if not opt.skip_grid:
+                        #     all_samples.append(x_samples_ddim)
 
-                if not opt.skip_grid:
-                    # additionally, save as grid
-                    grid = torch.stack(all_samples, 0)
-                    grid = rearrange(grid, 'n b c h w -> (n b) c h w')
+                # if not opt.skip_grid:
+                #     # additionally, save as grid
+                #     grid = torch.stack(all_samples, 0)
+                #     grid = rearrange(grid, 'n b c h w -> (n b) c h w')
                     
-                    for i in range(grid.size(0)):
-                        save_image(grid[i, :, :, :], os.path.join(outpath,opt.prompt+'_{}.png'.format(i)))
-                    grid = make_grid(grid, nrow=n_rows)
+                #     for i in range(grid.size(0)):
+                #         save_image(grid[i, :, :, :], os.path.join(outpath,opt.prompt+'_{}.png'.format(i)))
+                #     grid = make_grid(grid, nrow=n_rows)
 
-                    # to image
-                    grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
-                    Image.fromarray(grid.astype(np.uint8)).save(os.path.join(outpath, f'{prompt.replace(" ", "-")}-{grid_count:04}.jpg'))
-                    grid_count += 1
+                #     # to image
+                #     grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
+                #     Image.fromarray(grid.astype(np.uint8)).save(os.path.join(outpath, f'{prompt.replace(" ", "-")}-{grid_count:04}.jpg'))
+                #     grid_count += 1
                     
                     
 

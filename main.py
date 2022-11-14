@@ -191,10 +191,10 @@ def get_parser(**parser_kwargs):
         required=True,
         help="Path to model to actually resume from")
 
-    parser.add_argument("--data_root", 
-        type=str, 
-        required=True, 
-        help="Path to directory with training images")
+    # parser.add_argument("--data_root", 
+    #     type=str, 
+    #     required=True, 
+    #     help="Path to directory with training images")
     
     parser.add_argument("--reg_data_root", 
         type=str, 
@@ -637,7 +637,7 @@ if __name__ == "__main__":
             name = ""
 
         if opt.datadir_in_name:
-            now = os.path.basename(os.path.normpath(opt.data_root)) + now
+            now = os.path.basename(os.path.normpath("/home/profils/" + opt.profil + "/input")) + now
             
         nowname = now + name + opt.postfix
         logdir = os.path.join(opt.logdir, nowname)
@@ -692,12 +692,12 @@ if __name__ == "__main__":
             config.data.params.train.params.coarse_class_text = opt.class_word
             config.data.params.validation.params.coarse_class_text = opt.class_word
 
-        config.data.params.train.params.data_root = opt.data_root
+        config.data.params.train.params.data_root = "/home/profils/" + opt.profil + "/input"
         config.data.params.train.params.placeholder_token = opt.token
         config.data.params.train.params.token_only = opt.token_only or not opt.class_word
 
         config.data.params.validation.params.placeholder_token = opt.token
-        config.data.params.validation.params.data_root = opt.data_root
+        config.data.params.validation.params.data_root = "/home/profils/" + opt.profil + "/input"
 
         if opt.actual_resume:
             model = load_model_from_config(config, opt.actual_resume)
@@ -915,6 +915,7 @@ if __name__ == "__main__":
             os.rename(logdir, dst)
         if trainer.global_rank == 0:
             print("Training complete. max_training_steps reached or we blew up.")
-            os.makedirs("/home/profils/" + opt.profil, exist_ok=True)
+            # os.makedirs("/home/profils/" + opt.profil, exist_ok=True)
+            # os.makedirs("/home/profils/" + opt.profil + "/res", exist_ok=True)
             os.replace(logdir + "/checkpoints/last.ckpt", "/home/profils/" + opt.profil + "/last.ckpt")
             # print(trainer.profiler.summary())
